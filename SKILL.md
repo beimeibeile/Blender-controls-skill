@@ -1,5 +1,5 @@
----
-name: Blender-controls-skill
+﻿---
+name: blender-controls-skill
 version: 1.0.0
 description: |
   Blender 智能管理与控制技能。核心能力：3D场景管理、特效库、批量渲染、
