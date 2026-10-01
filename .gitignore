@@ -1,0 +1,60 @@
+# 环境变量
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Blender
+*.blend1
+*.blend2
+*.blend3
+*.blend@*
+
+# 输出文件
+output/
+results/
+renders/
+*.png
+*.jpg
+*.jpeg
+*.mp4
+*.webp
+*.gif
+*.exr
+*.hdr
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
