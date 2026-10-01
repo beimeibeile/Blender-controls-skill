@@ -104,6 +104,83 @@ class SelfEvolution:
             }
             self._save_json(self.best_practices_file, practices)
 
+    def record_quality_result(self, scene: str, params: Dict, quality_result: Dict) -> bool:
+        """
+        从质量检查结果中学习
+
+        Args:
+            scene: 场景名称
+            params: 渲染参数
+            quality_result: QualityController.check_render()的结果
+
+        Returns:
+            是否记录成功
+        """
+        score = quality_result.get("score", 0.5)
+        render_time = quality_result.get("render_time", 0)
+
+        result_summary = {
+            "success": quality_result.get("passed", False),
+            "score": score,
+            "checks": list(quality_result.get("checks", {}).keys()),
+            "failed_checks": [k for k, v in quality_result.get("checks", {}).items()
+                              if not v.get("passed", True)],
+        }
+
+        return self.record_result(scene, params, result_summary, score)
+
+    def get_optimization_report(self) -> Dict:
+        """生成全局优化建议报告"""
+        stats = self.get_learning_stats()
+        practices = self._load_json(self.best_practices_file, {})
+        log = self._load_json(self.learning_log_file, [])
+
+        report = {
+            "summary": stats,
+            "top_scenes": [],
+            "weak_scenes": [],
+            "recommendations": [],
+        }
+
+        # 找出表现最好和最差的场景
+        scene_scores = {}
+        for entry in log:
+            scene = entry.get("scene", "unknown")
+            if scene not in scene_scores:
+                scene_scores[scene] = []
+            scene_scores[scene].append(entry.get("quality_score", 0))
+
+        for scene, scores in scene_scores.items():
+            avg = sum(scores) / len(scores) if scores else 0
+            if avg >= 0.8:
+                report["top_scenes"].append({"scene": scene, "avg_score": round(avg, 3), "runs": len(scores)})
+            elif avg < 0.5:
+                report["weak_scenes"].append({"scene": scene, "avg_score": round(avg, 3), "runs": len(scores)})
+
+        # 生成建议
+        if stats["total_records"] < 10:
+            report["recommendations"].append("数据量不足，建议多运行几次场景以积累学习数据")
+        if report["weak_scenes"]:
+            report["recommendations"].append(f"以下场景表现较差，建议优化参数: {[s['scene'] for s in report['weak_scenes']]}")
+        if stats["high_quality_count"] > 0 and stats["total_records"] > 0:
+            rate = stats["high_quality_count"] / stats["total_records"]
+            if rate < 0.5:
+                report["recommendations"].append(f"高质量产出率仅{rate:.0%}，建议降低渲染复杂度或提升硬件")
+
+        return report
+
+    def export_knowledge(self, output_path: str) -> str:
+        """导出知识库为JSON"""
+        data = {
+            "best_practices": self._load_json(self.best_practices_file, {}),
+            "learning_log": self._load_json(self.learning_log_file, []),
+            "stats": self.get_learning_stats(),
+            "exported_at": datetime.now().isoformat(),
+        }
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return output_path
+
     def _load_json(self, path: str, default):
         if not os.path.exists(path):
             return default

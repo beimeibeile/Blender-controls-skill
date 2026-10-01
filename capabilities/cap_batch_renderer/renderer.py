@@ -60,24 +60,103 @@ class BatchRenderer:
         return results
 
     def render_scenes(self, scene_names: List[str], output_dir: str = None,
-                      on_progress: Callable = None) -> Dict:
-        """批量渲染场景模板"""
+                      params: Dict = None, on_progress: Callable = None) -> Dict:
+        """
+        批量渲染场景模板
+
+        Args:
+            scene_names: 场景模板名称列表
+            output_dir: 输出根目录
+            params: 统一覆盖参数
+            on_progress: 进度回调函数 (current, total, results)
+
+        Returns:
+            渲染结果字典
+        """
         from cap_scene_manager import SceneManager
         sm = SceneManager()
 
-        results = {"success": [], "failed": [], "total": len(scene_names)}
+        out_dir = output_dir or self.output_dir
+        results = {"success": [], "failed": [], "total": len(scene_names), "output_dir": out_dir}
+
         for i, scene_name in enumerate(scene_names):
             try:
-                scene = sm.load_scene(scene_name)
-                if scene:
-                    results["success"].append({"index": i, "scene": scene_name})
+                scene_out = os.path.join(out_dir, scene_name)
+                result = sm.run(scene_name, params=params, output_dir=scene_out)
+                if result and result.get("status") == "success":
+                    results["success"].append({
+                        "index": i,
+                        "scene": scene_name,
+                        "output_dir": scene_out,
+                        "frames": result.get("frames", 0),
+                    })
                 else:
-                    results["failed"].append({"index": i, "scene": scene_name, "error": "not found"})
+                    results["failed"].append({
+                        "index": i,
+                        "scene": scene_name,
+                        "error": result.get("error", "render_failed") if result else "not_found",
+                    })
             except Exception as e:
                 results["failed"].append({"index": i, "scene": scene_name, "error": str(e)})
 
             if on_progress:
                 on_progress(i + 1, len(scene_names), results)
+
+        return results
+
+    def render_with_quality_check(self, blend_files: List[str], output_dir: str = None,
+                                   quality_threshold: float = 0.7,
+                                   max_retries: int = 2,
+                                   on_progress: Callable = None) -> Dict:
+        """
+        带质量检查的批量渲染（不合格自动重渲染）
+
+        Args:
+            blend_files: .blend文件列表
+            output_dir: 输出目录
+            quality_threshold: 质量阈值
+            max_retries: 最大重试次数
+            on_progress: 进度回调
+
+        Returns:
+            渲染+质检结果
+        """
+        from cap_quality_control import QualityController
+        qc = QualityController(quality_threshold=quality_threshold)
+
+        out_dir = output_dir or self.output_dir
+        api = self._get_api()
+        results = {"success": [], "failed": [], "retried": [], "total": len(blend_files)}
+
+        for i, blend_file in enumerate(blend_files):
+            file_out = os.path.join(out_dir, os.path.splitext(os.path.basename(blend_file))[0])
+            attempt = 0
+            passed = False
+
+            while attempt <= max_retries and not passed:
+                render_result = api.render(blend_file, output_dir=file_out)
+                if not render_result.get("success"):
+                    attempt += 1
+                    continue
+
+                # 质量检查
+                output_files = [os.path.join(file_out, f) for f in os.listdir(file_out)
+                                if f.endswith(('.png', '.jpg', '.mp4'))] if os.path.exists(file_out) else []
+                if output_files:
+                    qc_result = qc.check_render(output_files[0])
+                    passed = qc_result.get("passed", False)
+
+                if not passed and attempt < max_retries:
+                    results["retried"].append({"file": blend_file, "attempt": attempt + 1})
+                attempt += 1
+
+            if passed:
+                results["success"].append({"index": i, "file": blend_file, "attempts": attempt})
+            else:
+                results["failed"].append({"index": i, "file": blend_file, "attempts": attempt})
+
+            if on_progress:
+                on_progress(i + 1, len(blend_files), results)
 
         return results
 
