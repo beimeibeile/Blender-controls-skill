@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blender-controls-skill"
+version = "1.0.0"
+description = "Blender 智能管理与控制技能 - 3D场景管理+特效库+批量渲染+质量控制"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Blender Controls Team"}]
+keywords = ["blender", "3d", "rendering", "effects", "animation", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+include = ["capabilities*", "blender_controls*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

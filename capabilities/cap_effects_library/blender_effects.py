@@ -18,7 +18,7 @@ from typing import Optional, Tuple, List
 # 导入BlenderRunner
 _cap_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "capabilities")
 sys.path.insert(0, _cap_dir)
-from cap_blender_runner.blender_runner import (
+from cap_api_wrapper.blender_runner import (
     BlenderRunner, BlenderScene, BlenderText, BlenderParticles, BlenderGlow,
 )
 

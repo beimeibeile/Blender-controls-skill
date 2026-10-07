@@ -22,7 +22,7 @@ _cap_dir = os.path.join(_skill_root, "capabilities")
 if _cap_dir not in sys.path:
     sys.path.insert(0, _cap_dir)
 
-from cap_blender_runner import (
+from cap_api_wrapper.blender_runner import (
     BlenderRunner, BlenderScene, BlenderText, BlenderParticles, BlenderGlow
 )
 

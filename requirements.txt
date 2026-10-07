@@ -1,0 +1,1 @@
+# Blender Controls Skill 无额外pip依赖（Blender通过subprocess调用）
