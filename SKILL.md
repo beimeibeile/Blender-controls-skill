@@ -33,16 +33,28 @@ metadata:
 
 > **Blender 智能管理与控制框架** —— 让 Blender 从工具变成自动出3D产品的智能体。场景管理 + 特效库 + 批量渲染 + 质量控制，全链路自动化。
 
-## 姊妹项目（航空母舰战斗群）
+## 姊妹项目（8姊妹skill）
 
 | 项目 | 定位 | 角色 |
 |------|------|------|
-| **ai-video-editor** | AI视频剪辑框架 | 🚢 航空母舰（集成平台） |
-| **anysearch-skill** | 深度搜索技能 | 📡 雷达（情报搜索） |
-| **Comfyui-controls-skill** | ComfyUI智能管理与控制 | 🚀 导弹（AI算力生成） |
-| **Blender-controls-skill** | Blender智能管理与控制（本项目） | 🚀 新导弹（3D合成特效） |
+| **ai-video-editor** | AI视频剪辑框架（大脑/集成平台） | 🚢 航空母舰 |
+| **jianying-editor** | 剪映工程控制 | ✂️ 剪辑底层 |
+| **Pr-controls-skill** | Pr工程控制 | 🎬 专业剪辑 |
+| **Ps-controls-skill** | Photoshop控制 | 🖼️ 图像处理 |
+| **Comfyui-controls-skill** | ComfyUI智能管理 | 🚀 AI算力 |
+| **Blender-controls-skill** | Blender智能管理（本项目） | 🎨 3D特效 |
+| **remotion-controls-skill** | Remotion代码动画 | 💻 代码动画 |
+| **anysearch-skill** | 深度搜索 | 📡 情报搜索 |
 
-> 单体都能干活，任意组合互相增强，聚齐就是航空母舰！
+> 单体都能干活，任意组合互相增强。能力注册中心v3.2统一调度，智能路由选择最佳skill。
+
+## 核心能力（模块下沉后）
+
+本skill已接收ai-video-editor下沉的2个3D特效模块，具备完整独立工作能力：
+
+- **Blender特效库**：blender_effects（粒子背景/3D文字入场/转场/光线扫描/能量环）
+- **Blender开场动画**：blender_intro
+- **运行器**：cap_blender_runner（BlenderRunner/BlenderScene/BlenderText/BlenderParticles/BlenderGlow）
 
 ## 核心能力
 
